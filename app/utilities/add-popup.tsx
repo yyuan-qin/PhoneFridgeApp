@@ -11,7 +11,7 @@ export const addOptionPopUp = (navigation: NavigationProp<any>) => {
             if (buttonIndex === 1) {
                 alert('Scan');
             } else if (buttonIndex === 2) {
-                navigation.navigate('./search');
+                navigation.navigate('TabTwoScreen');
             }
         }
     )
