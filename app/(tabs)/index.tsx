@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import AddItemButton from '../utilities/add-item-button';
+import AddItemButton from '../storage/add-item-button';
 
 const Tab = createMaterialTopTabNavigator();
 
