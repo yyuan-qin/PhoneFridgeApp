@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, Text, ActionSheetIOS } from 'react-native';
 import { useRouter } from 'expo-router';
 
+
 const AddItemButton = () => {
   const router = useRouter();
 
@@ -13,9 +14,9 @@ const AddItemButton = () => {
       },
       (buttonIndex) => {
         if (buttonIndex === 1) {
-          alert('Scan functionality coming soon!');
+          router.push('../storage/scan');
         } else if (buttonIndex === 2) {
-          router.push('../storage/search'); 
+          router.push('../storage/search');
         }
       }
     );
@@ -36,7 +37,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'green',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: 2
   },
+
   text: {
     color: 'white',
     fontSize: 30,

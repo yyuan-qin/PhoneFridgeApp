@@ -1,7 +1,5 @@
-import { View, Text, Modal} from 'react-native';
-
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { View, Text, PanResponder, Animated,TouchableOpacity } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,56 +7,275 @@ import AddItemButton from '../storage/add-item-button';
 
 const Tab = createMaterialTopTabNavigator();
 
-function AllScreen() {
-  return (
-    <View style={{padding: 330, marginTop: 320}}>
-      <AddItemButton/>
-    </View>
-  );
-} 
+function DraggableItem({ item, currentTab, onDrop, onQuantityChange }) {
+  const pan = useState(new Animated.ValueXY())[0];
 
-function FridgeScreen() {
+  const panResponder = useState(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: (e, gesture) => {
+        if (gesture.moveY < 100) {
+          const tabXPositions = [0, 100, 200, 300];
+          let targetTab = null;
+
+          if (gesture.moveX >= tabXPositions[0] && gesture.moveX < tabXPositions[1]) {
+            targetTab = 'All';
+          } else if (gesture.moveX >= tabXPositions[1] && gesture.moveX < tabXPositions[2]) {
+            targetTab = 'Fridge';
+          } else if (gesture.moveX >= tabXPositions[2] && gesture.moveX < tabXPositions[3]) {
+            targetTab = 'Frozen';
+          } else if (gesture.moveX >= tabXPositions[3]) {
+            targetTab = 'Pantry';
+          }
+
+          if (targetTab && targetTab !== currentTab) {
+            onDrop(item.name, currentTab, targetTab);
+          }
+        }
+        Animated.spring(pan, {
+          toValue: { x: 0, y: 0 },
+          useNativeDriver: false,
+        }).start();
+      },
+    })
+  )[0];
+
+  const backgroundColor =
+    item.expiration <= 1
+      ? '#f57676'
+      : item.expiration <= 3
+      ? '#f7b583'
+      : '#a5e6a6';
+
   return (
-    <View style={{padding: 330, marginTop: 320}}>
-      <AddItemButton/>
-    </View>
+    <Animated.View
+      {...panResponder.panHandlers}
+      style={{
+        transform: [{ translateX: pan.x }, { translateY: pan.y }],
+        margin: 10,
+      }}
+    >
+      <View style={[styles.itemContainer, styles.shadow]}>
+        <Text style={{...styles.itemName, color: "#381902"}}>{item.name}</Text>
+        <Text style={{...styles.expiryContainer, fontWeight: 'bold', backgroundColor}}>{item.expiration} days</Text>
+        <View style={styles.quantityButtoncontanier}>
+          <TouchableOpacity
+            style={styles.quantityButton}
+            onPress={() => onQuantityChange(item.name, item.quantity - 1)}
+          >
+            <Text>-</Text>
+          </TouchableOpacity>
+          <Text style={{color: "#381902", fontWeight: 'bold'}}>{item.quantity}</Text>
+          <TouchableOpacity
+            style={styles.quantityButton}
+            onPress={() => onQuantityChange(item.name, item.quantity + 1)}
+          >
+            <Text>+</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Animated.View>
   );
 }
 
-function FrozenScreen() {
+function TabScreen({ items, currentTab, onDrop, onQuantityChange }) {
   return (
-    <View style={{padding: 330, marginTop: 320}}>
-      <AddItemButton />
-    </View>
-  );
-}
-
-function PantryScreen() {
-  return (
-    <View style={{padding: 330, marginTop: 320}}>
-      <AddItemButton />
+    <View style={{ flex: 1, padding: 10 }}>
+      {items.map((item, index) => (
+        <DraggableItem
+          key={index}
+          item={item}
+          currentTab={currentTab}
+          onDrop={onDrop}
+          onQuantityChange={onQuantityChange}
+        />
+      ))}
+      <View style={[styles.buttonPosition, styles.shadow]}>
+        <AddItemButton />
+      </View>
     </View>
   );
 }
 
 export default function HomeScreen() {
+  const [allItems, setAllItems] = useState([
+    { name: 'Apples', expiration: 5, quantity: 1 },
+    { name: 'Banana', expiration: 3, quantity: 1 },
+    { name: 'Lettuce', expiration: 1, quantity: 1 },
+  ]);
+  const [fridgeItems, setFridgeItems] = useState([]);
+  const [frozenItems, setFrozenItems] = useState([]);
+  const [pantryItems, setPantryItems] = useState([]);
+
+  const handleDrop = (itemName, sourceTab, targetTab) => {
+    const removeItem = (list, name) => list.filter((item) => item.name !== name);
+    const findItem = (list, name) => list.find((item) => item.name === name);
+
+    let item = null;
+    switch (sourceTab) {
+      case 'All':
+        item = findItem(allItems, itemName);
+        setAllItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      case 'Fridge':
+        item = findItem(fridgeItems, itemName);
+        setFridgeItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      case 'Frozen':
+        item = findItem(frozenItems, itemName);
+        setFrozenItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      case 'Pantry':
+        item = findItem(pantryItems, itemName);
+        setPantryItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      default:
+        break;
+    }
+
+    if (item) {
+      switch (targetTab) {
+        case 'All':
+          setAllItems((prevItems) => [...prevItems, item]);
+          break;
+        case 'Fridge':
+          setFridgeItems((prevItems) => [...prevItems, item]);
+          break;
+        case 'Frozen':
+          setFrozenItems((prevItems) => [...prevItems, item]);
+          break;
+        case 'Pantry':
+          setPantryItems((prevItems) => [...prevItems, item]);
+          break;
+        default:
+          break;
+      }
+    }
+  };
+
+  const handleQuantityChange = (itemName, newQuantity) => {
+    const updateItemQuantity = (list, name, quantity) =>
+      list.map((item) =>
+        item.name === name ? { ...item, quantity: Math.max(0, quantity) } : item
+      );
+
+    setAllItems((prevItems) => updateItemQuantity(prevItems, itemName, newQuantity));
+    setFridgeItems((prevItems) => updateItemQuantity(prevItems, itemName, newQuantity));
+    setFrozenItems((prevItems) => updateItemQuantity(prevItems, itemName, newQuantity));
+    setPantryItems((prevItems) => updateItemQuantity(prevItems, itemName, newQuantity));
+  };
+
   return (
-    <NavigationContainer independent={true}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Tab.Navigator 
+    <SafeAreaView style={{ flex: 1 }}>
+      <Tab.Navigator
         screenOptions={{
           animationEnabled: false,
           swipeEnabled: false,
           tabBarIndicatorStyle: {
             backgroundColor: 'green',
           },
-         }}>
-          <Tab.Screen name="All" component={AllScreen} />
-          <Tab.Screen name="Fridge" component={FridgeScreen} />
-          <Tab.Screen name="Frozen" component={FrozenScreen} />
-          <Tab.Screen name="Pantry" component={PantryScreen} />
-        </Tab.Navigator>
-      </SafeAreaView>
-    </NavigationContainer>
+        }}
+      >
+        <Tab.Screen name="All">
+          {() => (
+            <TabScreen
+              items={allItems}
+              currentTab="All"
+              onDrop={handleDrop}
+              onQuantityChange={handleQuantityChange}
+            />
+          )}
+        </Tab.Screen>
+        <Tab.Screen name="Fridge">
+          {() => (
+            <TabScreen
+              items={fridgeItems}
+              currentTab="Fridge"
+              onDrop={handleDrop}
+              onQuantityChange={handleQuantityChange}
+            />
+          )}
+        </Tab.Screen>
+        <Tab.Screen name="Frozen">
+          {() => (
+            <TabScreen
+              items={frozenItems}
+              currentTab="Frozen"
+              onDrop={handleDrop}
+              onQuantityChange={handleQuantityChange}
+            />
+          )}
+        </Tab.Screen>
+        <Tab.Screen name="Pantry">
+          {() => (
+            <TabScreen
+              items={pantryItems}
+              currentTab="Pantry"
+              onDrop={handleDrop}
+              onQuantityChange={handleQuantityChange}
+            />
+          )}
+        </Tab.Screen>
+      </Tab.Navigator>
+    </SafeAreaView>
   );
 }
+
+const styles = {
+  itemContainer: { 
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15, 
+    borderRadius: 10,
+    backgroundColor: '#fff',
+  },
+
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+
+  itemName: { 
+    fontSize: 16, 
+    fontWeight: 'bold',
+    fontFamily: 'Gill Sans',
+  },
+
+  expiryContainer: {
+    position: 'absolute',
+    right: 150,
+    padding: 5,
+    borderRadius: 5,
+    paddingLeft: 25,
+    paddingRight: 25,
+  },
+
+  quantityButton: {
+    width: 20,
+    height: 20,
+    marginHorizontal: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  quantityButtoncontanier: {
+    position: 'absolute',
+    right: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  
+  buttonPosition: {
+    position: 'absolute',
+    bottom: 0,
+    right: 40,
+  },
+};

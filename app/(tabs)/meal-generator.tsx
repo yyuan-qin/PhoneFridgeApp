@@ -134,6 +134,18 @@ function CustomSlider() {
   );
 }
 
+export default function MealGenerator() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Selection />
+      <CustomSlider />
+      <TouchableOpacity style={[styles.button, styles.shadow]} onPress={() => {}}>
+        <Text style={styles.buttonText}>Generate Recipes</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -153,6 +165,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     alignSelf: 'flex-start',
+    fontFamily: 'Gill Sans',
   },
 
   selection: {
@@ -180,27 +193,24 @@ const styles = StyleSheet.create({
   button: {
     width: '50%',
     height: 50,
-    borderRadius: 10,
-    backgroundColor: '#5bb362',
+    borderRadius: 25,
+    backgroundColor: 'green',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontFamily: 'Gill Sans',
+    fontSize: 19,
     fontWeight: 'bold',
-  }
-});
+  },
 
-export default function MealGenerator() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Selection />
-      <CustomSlider />
-      <TouchableOpacity style={styles.button} onPress={() => {}}>
-        <Text style={styles.buttonText}>GENERATE RECIPES</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
-  );
-}
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+});

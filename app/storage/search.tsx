@@ -1,20 +1,29 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
+import { useRouter } from 'expo-router';
 
 const SearchScreen = () => {
+  const router = useRouter();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([
-    { id: '1', name: 'Corn' },
-    { id: '2', name: 'Frozen corn' },
-    { id: '3', name: 'Popcorn' },
-  ]);
+  const [results, setResults] = useState([]);
+
+  const allItems = [
+    { id: '1', name: 'Corn', selected: false },
+    { id: '2', name: 'Frozen corn', selected: false },
+    { id: '3', name: 'Popcorn', selected: false },
+  ];
 
   const handleSearch = () => {
-    // Implement search logic here
-    console.log('Searching for:', query);
+    if (query.trim()) {
+      const filteredResults = allItems.filter((item) =>
+        item.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setResults(filteredResults);
+    } else {
+      setResults([]); // Clear results if query is empty
+    }
   };
 
   const handleToggle = (itemId) => {
@@ -25,21 +34,27 @@ const SearchScreen = () => {
     );
   };
 
+  const handleFinish = () => {
+    router.push('../storage/review-items');
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          value={query}
-          onChangeText={setQuery}
-        />
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Ionicons name="search" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.searchBox}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search..."
+            value={query}
+            onChangeText={setQuery}
+          />
+          <TouchableOpacity onPress={handleSearch}>
+            <Ionicons name="search" size={24} color="#888" style={styles.searchIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <FlatList
+      <FlatList style={styles.itemListContainer}
         data={results}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -48,96 +63,100 @@ const SearchScreen = () => {
             <Checkbox
               value={item.selected}
               onValueChange={() => handleToggle(item.id)}
-              style={styles.checkbox}
+              style={[styles.checkbox, { color: item.selected ? '#28a745' : '#ccc' }]}
             />
           </View>
         )}
       />
 
-      <TouchableOpacity style={styles.finishButton}>
+      <TouchableOpacity style={[styles.finishButton, styles.shadow]} onPress={handleFinish}>
         <Text style={styles.finishButtonText}>Finish</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 30,
     backgroundColor: '#fff',
   },
-  
+
   searchContainer: {
-    flexDirection: 'row',
     marginBottom: 16,
   },
 
-  searchInput: {
-    flex: 1,
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     paddingHorizontal: 8,
-    height: 40,
+    backgroundColor: '#f9f9f9',
   },
 
-  searchButton: {
+  searchInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    paddingHorizontal: 8,
+  },
+
+  searchIcon: {
     marginLeft: 8,
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    height: 40,
-  },
-
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
 
   itemContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+
+  itemListContainer: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
   },
 
   itemText: {
     fontSize: 16,
   },
 
-  addButton: {
-    backgroundColor: '#28a745',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 32,
-    height: 32,
-  },
-
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  checkbox: {
+    width: 24,
+    height: 24,
   },
 
   finishButton: {
-    width: '100%',
     marginTop: 16,
-    backgroundColor: '#5bb362',
-    borderRadius: 8,
+    paddingVertical: 12,
+    width: '50%',
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'green',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 12,
   },
-  
+
   finishButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 3,
   },
 });
 

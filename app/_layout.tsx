@@ -31,6 +31,8 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen name="storage/search" options={{ headerBackTitle: "Back", headerTitle: "Search"}}/>
+        <Stack.Screen name="storage/review-items" options={{ headerBackTitle: "Back", headerTitle: "Review Your Groceries!"}}/>
       </Stack>
     </ThemeProvider>
   );
