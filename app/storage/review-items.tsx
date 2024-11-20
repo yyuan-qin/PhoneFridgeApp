@@ -69,10 +69,10 @@ const GroceryReview = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Ionicons name="chevron-back-outline" size={24} color="#888" style={styles.backIcon} />
+      </TouchableOpacity>
       <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="chevron-back-outline" size={24} color="#888" style={styles.backIcon}/>
-        </TouchableOpacity>
         <Text style={styles.title}>Review your groceries  </Text>
       </View>
       <FlatList
@@ -89,9 +89,9 @@ const GroceryReview = () => {
           disabled={!allItemsHaveStorage}
           onPress={() => router.push('../(tabs)')}
         >
-          <Text style={styles.addButtonText}>ADD TO INVENTORY</Text>
+          <Text style={styles.addButtonText}>Add To Inventory</Text>
         </TouchableOpacity>
-    </View>
+      </View>
     </View>
   );
 };
@@ -100,7 +100,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 35,
-    marginBottom: 5,
     padding: 30,
   },
 
@@ -110,7 +109,8 @@ const styles = StyleSheet.create({
   },
 
   backIcon: {
-    left: -80,
+    position: 'absolute',
+    left: 0,
   },
 
   headerContainer: {

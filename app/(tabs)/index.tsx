@@ -4,20 +4,24 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AddItemButton from '../storage/add-item-button';
+import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createMaterialTopTabNavigator();
 
-function DraggableItem({ item, currentTab, onDrop, onQuantityChange }) {
+function DraggableItem({ item, currentTab, onDrop, onQuantityChange, setTrashVisible, handleTrashDrop }) {
   const pan = useState(new Animated.ValueXY())[0];
 
   const panResponder = useState(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => setTrashVisible(true),
       onPanResponderMove: Animated.event(
         [null, { dx: pan.x, dy: pan.y }],
         { useNativeDriver: false }
       ),
       onPanResponderRelease: (e, gesture) => {
+        setTrashVisible(false);
+
         if (gesture.moveY < 100) {
           const tabXPositions = [100, 200, 300];
           let targetTab = null;
@@ -33,6 +37,10 @@ function DraggableItem({ item, currentTab, onDrop, onQuantityChange }) {
           if (targetTab && targetTab !== currentTab) {
             onDrop(item.name, currentTab, targetTab);
           }
+        }
+
+        if (gesture.moveY > 780 && gesture.moveX < 50) {
+          handleTrashDrop(item.name, currentTab);
         }
         Animated.spring(pan, {
           toValue: { x: 0, y: 0 },
@@ -80,7 +88,7 @@ function DraggableItem({ item, currentTab, onDrop, onQuantityChange }) {
   );
 }
 
-function TabScreen({ items, currentTab, onDrop, onQuantityChange }) {
+function TabScreen({ items, currentTab, onDrop, onQuantityChange, setTrashVisible, handleTrashDrop }) {
   return (
     <View style={{ flex: 1, padding: 10 }}>
       {items.map((item, index) => (
@@ -90,6 +98,8 @@ function TabScreen({ items, currentTab, onDrop, onQuantityChange }) {
           currentTab={currentTab}
           onDrop={onDrop}
           onQuantityChange={onQuantityChange}
+          setTrashVisible={setTrashVisible}
+          handleTrashDrop={handleTrashDrop}
         />
       ))}
       <View style={[styles.addItemButton, styles.shadow]}>
@@ -114,6 +124,8 @@ export default function HomeScreen() {
     { name: 'Banana', expiration: 3, quantity: 1 },
   ]);
 
+  const [trashVisible, setTrashVisible] = useState(false);
+
   const handleDrop = (itemName, sourceTab, targetTab) => {
     const removeItem = (list, name) => list.filter((item) => item.name !== name);
     const findItem = (list, name) => list.find((item) => item.name === name);
@@ -122,10 +134,12 @@ export default function HomeScreen() {
     switch (sourceTab) {
       case 'Fridge':
         item = findItem(fridgeItems, itemName);
+        item.expiration = item.expiration - 3;
         setFridgeItems((prevItems) => removeItem(prevItems, itemName));
         break;
       case 'Frozen':
         item = findItem(frozenItems, itemName);
+        item.expiration = item.expiration - 20;
         setFrozenItems((prevItems) => removeItem(prevItems, itemName));
         break;
       case 'Pantry':
@@ -139,9 +153,11 @@ export default function HomeScreen() {
     if (item) {
       switch (targetTab) {
         case 'Fridge':
+          item.expiration = item.expiration + 3;
           setFridgeItems((prevItems) => [...prevItems, item]);
           break;
         case 'Frozen':
+          item.expiration = item.expiration + 20;
           setFrozenItems((prevItems) => [...prevItems, item]);
           break;
         case 'Pantry':
@@ -150,6 +166,30 @@ export default function HomeScreen() {
         default:
           break;
       }
+    }
+  };
+
+  const handleTrashDrop = (itemName, sourceTab) => {
+    const removeItem = (list, name) => list.filter((item) => item.name !== name);
+
+    switch (sourceTab) {
+      case 'All':
+        setAllItems((prevItems) => removeItem(prevItems, itemName));
+        setFridgeItems((prevItems) => removeItem(prevItems, itemName));
+        setFrozenItems((prevItems) => removeItem(prevItems, itemName));
+        setPantryItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      case 'Fridge':
+        setFridgeItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      case 'Frozen':
+        setFrozenItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      case 'Pantry':
+        setPantryItems((prevItems) => removeItem(prevItems, itemName));
+        break;
+      default:
+        break;
     }
   };
 
@@ -183,6 +223,8 @@ export default function HomeScreen() {
               currentTab="All"
               onDrop={handleDrop}
               onQuantityChange={handleQuantityChange}
+              setTrashVisible={setTrashVisible}
+              handleTrashDrop={handleTrashDrop}
             />
           )}
         </Tab.Screen>
@@ -193,6 +235,8 @@ export default function HomeScreen() {
               currentTab="Fridge"
               onDrop={handleDrop}
               onQuantityChange={handleQuantityChange}
+              setTrashVisible={setTrashVisible}
+              handleTrashDrop={handleTrashDrop}
             />
           )}
         </Tab.Screen>
@@ -203,6 +247,8 @@ export default function HomeScreen() {
               currentTab="Frozen"
               onDrop={handleDrop}
               onQuantityChange={handleQuantityChange}
+              setTrashVisible={setTrashVisible}
+              handleTrashDrop={handleTrashDrop}
             />
           )}
         </Tab.Screen>
@@ -213,15 +259,23 @@ export default function HomeScreen() {
               currentTab="Pantry"
               onDrop={handleDrop}
               onQuantityChange={handleQuantityChange}
+              setTrashVisible={setTrashVisible}
+              handleTrashDrop={handleTrashDrop}
             />
           )}
         </Tab.Screen>
       </Tab.Navigator>
+      {trashVisible && (
+        <View>
+          <Ionicons name="trash-outline" style={styles.trashIcon} />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = {
+  
   itemContainer: { 
     flexDirection: 'row',
     alignItems: 'center',
@@ -273,5 +327,13 @@ const styles = {
     position: 'absolute',
     bottom: 10,
     right: 40,
+  },
+
+  trashIcon: {
+    position: 'absolute',
+    bottom: 5,
+    left: 30,
+    fontSize: 30,
+    color: 'gray',
   },
 };

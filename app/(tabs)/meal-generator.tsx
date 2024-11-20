@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, TouchableWithoutFeedback } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Slider from '@react-native-community/slider';
+import { useRouter } from 'expo-router';
 
 
 function Selection() {
@@ -83,7 +84,7 @@ function Selection() {
 function CustomSlider() {
   const [mealTime, setMealTime] = useState(10);
   const [servingNum, setServingNum] = useState(1);
-  const [spicyLevel, setSpicyLevel] = useState(0);
+  const [difficulty, setDifficulty] = useState(1);
 
   return (
     <View style={[styles.innerContainer, { zIndex: 1000 }]}>
@@ -102,18 +103,18 @@ function CustomSlider() {
 
       <View style={{ padding: 15 }} />
 
-      <Text style={styles.text}>Spicy Level</Text>
+      <Text style={styles.text}>Dish Difficulty</Text>
       <Slider
         style={styles.slider}
         minimumValue={1}
         maximumValue={5}
         step={1}
-        value={spicyLevel}
-        onValueChange={(value) => setSpicyLevel(value)}
+        value={difficulty}
+        onValueChange={(value) => setDifficulty(value)}
         minimumTrackTintColor="green"
         thumbTintColor="#4CAF50"
       />
-      <Text style={styles.sliderValue}> Level {spicyLevel}</Text>
+      <Text style={styles.sliderValue}> Level {difficulty}</Text>
 
       <View style={{ padding: 15 }} />
 
@@ -135,12 +136,13 @@ function CustomSlider() {
 }
 
 export default function MealGenerator() {
+  const router = useRouter();
   return (
     <SafeAreaView style={styles.container}>
       <Selection />
       <CustomSlider />
-      <TouchableOpacity style={[styles.button, styles.shadow]} onPress={() => {}}>
-        <Text style={styles.buttonText}>Generate Recipes</Text>
+      <TouchableOpacity style={[styles.button, styles.shadow]} onPress={() => router.push('../meal-generator/recipe-list')}>
+        <Text style={styles.buttonText}>Genereate Recipes</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    width: '50%',
+    width: '60%',
     height: 50,
     borderRadius: 25,
     backgroundColor: 'green',

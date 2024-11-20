@@ -59,10 +59,10 @@ const SearchScreen = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Ionicons name="chevron-back-outline" size={24} color="#888" style={styles.backIcon} />
+      </TouchableOpacity>
       <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="chevron-back-outline" size={24} color="#888" style={styles.backIcon}/>
-        </TouchableOpacity>
         <Text style={styles.title}>Search for Items </Text>
       </View>
       <View style={styles.searchContainer}>
@@ -95,12 +95,12 @@ const SearchScreen = () => {
 
       <View style={styles.finishButtonContainer}>
         <TouchableOpacity
-        style={[styles.finishButton, isFinishDisabled && styles.disabledButton]}
-        onPress={handleFinish}
-        disabled={isFinishDisabled}
-      >
-        <Text style={styles.finishButtonText}>FINISH</Text>
-      </TouchableOpacity>
+          style={[styles.finishButton, isFinishDisabled && styles.disabledButton]}
+          onPress={handleFinish}
+          disabled={isFinishDisabled}
+        >
+          <Text style={styles.finishButtonText}>Finish</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: 35,
-    marginBottom: 25,
+    marginBottom: 20,
     padding: 30,
   },
 
@@ -120,7 +120,8 @@ const styles = StyleSheet.create({
   },
 
   backIcon: {
-    left: -105,
+    position: 'absolute',
+    left: 0,
   },
 
   headerContainer: {

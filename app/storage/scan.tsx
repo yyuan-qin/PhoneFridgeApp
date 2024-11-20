@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
 
   camera: {
     flex: 1,
+    marginBottom: 10,
   },
 
   controls: {

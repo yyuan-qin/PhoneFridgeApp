@@ -34,6 +34,8 @@ export default function RootLayout() {
         <Stack.Screen name="storage/search" options={{ headerShown: false }}/>
         <Stack.Screen name="storage/review-items" options={{ headerShown: false }}/>
         <Stack.Screen name="storage/scan" options={{ headerShown: false }}/>
+        <Stack.Screen name="meal-generator/recipe-list" options={{ headerShown: false }}/>
+        <Stack.Screen name="meal-generator/detailed-recipe" options={{ headerShown: false }}/>
       </Stack>
     </ThemeProvider>
   );
