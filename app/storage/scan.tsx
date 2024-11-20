@@ -1,86 +1,107 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { Camera } from 'expo-camera';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { useState } from 'react';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
-const ScanningScreen = () => {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const cameraRef = useRef<Camera | null>(null);
+export default function Scan() {
+  const router = useRouter();
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [permission, requestPermission] = useCameraPermissions();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  if (!permission) {
+    return <View />;
+  }
 
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
-    setIsScanning(false);
-    Alert.alert(`Bar code of type ${type} scanned!`, `Data: ${data}`);
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
+      </View>
+    );
+  }
+  
+  const handleClick = () => {
+    router.push('../storage/review-items');
   };
-
-  if (hasPermission === null) {
-    return <Text>Requesting for camera permission...</Text>;
-  }
-
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
 
   return (
     <View style={styles.container}>
-      <Camera
-        style={styles.camera}
-        type={Camera.Constants.Type.back}
-        ref={cameraRef}
-        onBarCodeScanned={isScanning ? handleBarCodeScanned : undefined}
-      >
-        <View style={styles.overlay}>
-          <View style={styles.scannerBox} />
+      <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back-outline" size={24} color="#888" style={styles.backIcon}/>
+        </TouchableOpacity>
+        <Text style={styles.title}>Scan items or receipt </Text>
+      </View>
+      <CameraView style={styles.camera} facing={facing}>
+        <View style={styles.controls}>
+          <TouchableOpacity style={styles.captureButton} onPress={handleClick}>
+            <View style={styles.innerCircle} />
+          </TouchableOpacity>
         </View>
-      </Camera>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setIsScanning((prev) => !prev)}
-      >
-        <Text style={styles.buttonText}>
-          {isScanning ? 'Stop Scanning' : 'Start Scanning'}
-        </Text>
-      </TouchableOpacity>
+      </CameraView>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
   },
+
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+
+  backIcon: {
+    left: -90,
+  },
+
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 35,
+    marginBottom: 25,
+    padding: 30,
+  },
+
   camera: {
     flex: 1,
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
+
+  controls: {
+    position: 'absolute',
+    bottom: 30,
+    width: '100%',
+    alignItems: 'center',
+  },
+
+  captureButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 5,
+    borderColor: '#ddd',
   },
-  scannerBox: {
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: '#00FF00',
-    backgroundColor: 'transparent',
+
+  innerCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fff',
   },
-  button: {
-    backgroundColor: '#1e90ff',
-    padding: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
+
+  message: {
     color: '#fff',
-    fontSize: 16,
+    textAlign: 'center',
+    fontSize: 20,
   },
 });
-
-export default ScanningScreen;

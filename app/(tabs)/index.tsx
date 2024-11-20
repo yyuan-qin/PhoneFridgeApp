@@ -19,16 +19,14 @@ function DraggableItem({ item, currentTab, onDrop, onQuantityChange }) {
       ),
       onPanResponderRelease: (e, gesture) => {
         if (gesture.moveY < 100) {
-          const tabXPositions = [0, 100, 200, 300];
+          const tabXPositions = [100, 200, 300];
           let targetTab = null;
 
           if (gesture.moveX >= tabXPositions[0] && gesture.moveX < tabXPositions[1]) {
-            targetTab = 'All';
-          } else if (gesture.moveX >= tabXPositions[1] && gesture.moveX < tabXPositions[2]) {
             targetTab = 'Fridge';
-          } else if (gesture.moveX >= tabXPositions[2] && gesture.moveX < tabXPositions[3]) {
+          } else if (gesture.moveX >= tabXPositions[1] && gesture.moveX < tabXPositions[2]) {
             targetTab = 'Frozen';
-          } else if (gesture.moveX >= tabXPositions[3]) {
+          } else if (gesture.moveX >= tabXPositions[2]) {
             targetTab = 'Pantry';
           }
 
@@ -94,7 +92,7 @@ function TabScreen({ items, currentTab, onDrop, onQuantityChange }) {
           onQuantityChange={onQuantityChange}
         />
       ))}
-      <View style={[styles.buttonPosition, styles.shadow]}>
+      <View style={[styles.addItemButton, styles.shadow]}>
         <AddItemButton />
       </View>
     </View>
@@ -107,9 +105,14 @@ export default function HomeScreen() {
     { name: 'Banana', expiration: 3, quantity: 1 },
     { name: 'Lettuce', expiration: 1, quantity: 1 },
   ]);
-  const [fridgeItems, setFridgeItems] = useState([]);
+  const [fridgeItems, setFridgeItems] = useState([
+    { name: 'Apples', expiration: 5, quantity: 1 },
+    { name: 'Lettuce', expiration: 1, quantity: 1 },
+  ]);
   const [frozenItems, setFrozenItems] = useState([]);
-  const [pantryItems, setPantryItems] = useState([]);
+  const [pantryItems, setPantryItems] = useState([
+    { name: 'Banana', expiration: 3, quantity: 1 },
+  ]);
 
   const handleDrop = (itemName, sourceTab, targetTab) => {
     const removeItem = (list, name) => list.filter((item) => item.name !== name);
@@ -117,10 +120,6 @@ export default function HomeScreen() {
 
     let item = null;
     switch (sourceTab) {
-      case 'All':
-        item = findItem(allItems, itemName);
-        setAllItems((prevItems) => removeItem(prevItems, itemName));
-        break;
       case 'Fridge':
         item = findItem(fridgeItems, itemName);
         setFridgeItems((prevItems) => removeItem(prevItems, itemName));
@@ -139,9 +138,6 @@ export default function HomeScreen() {
 
     if (item) {
       switch (targetTab) {
-        case 'All':
-          setAllItems((prevItems) => [...prevItems, item]);
-          break;
         case 'Fridge':
           setFridgeItems((prevItems) => [...prevItems, item]);
           break;
@@ -160,7 +156,7 @@ export default function HomeScreen() {
   const handleQuantityChange = (itemName, newQuantity) => {
     const updateItemQuantity = (list, name, quantity) =>
       list.map((item) =>
-        item.name === name ? { ...item, quantity: Math.max(0, quantity) } : item
+        item.name === name ? { ...item, quantity: Math.max(1, quantity) } : item
       );
 
     setAllItems((prevItems) => updateItemQuantity(prevItems, itemName, newQuantity));
@@ -254,7 +250,7 @@ const styles = {
     padding: 5,
     borderRadius: 5,
     paddingLeft: 25,
-    paddingRight: 25,
+    paddingRight:25,
   },
 
   quantityButton: {
@@ -273,9 +269,9 @@ const styles = {
     marginTop: 5,
   },
   
-  buttonPosition: {
+  addItemButton: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 10,
     right: 40,
   },
 };

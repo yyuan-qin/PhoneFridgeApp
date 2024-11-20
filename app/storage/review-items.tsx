@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import { Ionicons } from '@expo/vector-icons';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from 'expo-router';
 
 const GroceryReview = () => {
+  const router = useRouter();
+
   const [groceries, setGroceries] = useState([
     { id: 1, name: "Steak", storage: "", amount: 1 },
     { id: 2, name: "Salmon", storage: "", amount: 1 },
@@ -27,6 +30,8 @@ const GroceryReview = () => {
       )
     );
   };
+
+  const allItemsHaveStorage = groceries.every((item) => item.storage);
 
   const renderItem = ({ item }) => (
     <View style={[styles.itemContainer, styles.shadow]}>
@@ -64,14 +69,27 @@ const GroceryReview = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back-outline" size={24} color="#888" style={styles.backIcon}/>
+        </TouchableOpacity>
+        <Text style={styles.title}>Review your groceries  </Text>
+      </View>
       <FlatList
         data={groceries}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
       />
       <View style={styles.addButtonContainer}>
-        <TouchableOpacity style={[styles.addButton, styles.shadow]}>
-          <Text style={styles.addButtonText}>Add to Storage</Text>
+        <TouchableOpacity
+          style={[
+            styles.addButton,
+            !allItemsHaveStorage && styles.addButtonDisabled,
+          ]}
+          disabled={!allItemsHaveStorage}
+          onPress={() => router.push('../(tabs)')}
+        >
+          <Text style={styles.addButtonText}>ADD TO INVENTORY</Text>
         </TouchableOpacity>
     </View>
     </View>
@@ -81,7 +99,25 @@ const GroceryReview = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    marginTop: 35,
+    marginBottom: 5,
+    padding: 30,
+  },
+
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  backIcon: {
+    left: -80,
+  },
+
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
 
   itemContainer: {
@@ -140,13 +176,17 @@ const styles = StyleSheet.create({
   },
 
   addButton: {
-    width: '50%',
+    width: '80%',
     height: 50,
     borderRadius: 25,
     marginBottom: 20,
     backgroundColor: 'green',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  addButtonDisabled: {
+    backgroundColor: '#a5c2a3',
   },
 
   addButtonText: {

@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Checkbox from 'expo-checkbox';
 import { useRouter } from 'expo-router';
+
+const CustomCheckbox = ({ value, onValueChange }) => {
+  return (
+    <TouchableOpacity onPress={onValueChange} style={styles.checkbox}>
+      <Ionicons
+        name={value ? "checkbox" : "square-outline"}
+        size={24}
+        color={value ? "#28a745" : "#ccc"}
+      />
+    </TouchableOpacity>
+  );
+};
 
 const SearchScreen = () => {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-
-  const allItems = [
+  const [allItems, setAllItems] = useState([
     { id: '1', name: 'Corn', selected: false },
     { id: '2', name: 'Frozen corn', selected: false },
     { id: '3', name: 'Popcorn', selected: false },
-  ];
+  ]);
 
   const handleSearch = () => {
     if (query.trim()) {
@@ -22,7 +32,8 @@ const SearchScreen = () => {
       );
       setResults(filteredResults);
     } else {
-      setResults([]); // Clear results if query is empty
+      const selectedItems = allItems.filter((item) => item.selected);
+      setResults(selectedItems);
     }
   };
 
@@ -32,19 +43,33 @@ const SearchScreen = () => {
         item.id === itemId ? { ...item, selected: !item.selected } : item
       )
     );
+
+    setAllItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === itemId ? { ...item, selected: !item.selected } : item
+      )
+    );
   };
 
   const handleFinish = () => {
     router.push('../storage/review-items');
   };
 
+  const isFinishDisabled = !allItems.some((item) => item.selected);
+
   return (
     <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back-outline" size={24} color="#888" style={styles.backIcon}/>
+        </TouchableOpacity>
+        <Text style={styles.title}>Search for Items </Text>
+      </View>
       <View style={styles.searchContainer}>
         <View style={styles.searchBox}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search..."
+            placeholder="Search"
             value={query}
             onChangeText={setQuery}
           />
@@ -60,18 +85,23 @@ const SearchScreen = () => {
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <Text style={styles.itemText}>{item.name}</Text>
-            <Checkbox
+            <CustomCheckbox
               value={item.selected}
               onValueChange={() => handleToggle(item.id)}
-              style={[styles.checkbox, { color: item.selected ? '#28a745' : '#ccc' }]}
             />
           </View>
         )}
       />
 
-      <TouchableOpacity style={[styles.finishButton, styles.shadow]} onPress={handleFinish}>
-        <Text style={styles.finishButtonText}>Finish</Text>
+      <View style={styles.finishButtonContainer}>
+        <TouchableOpacity
+        style={[styles.finishButton, isFinishDisabled && styles.disabledButton]}
+        onPress={handleFinish}
+        disabled={isFinishDisabled}
+      >
+        <Text style={styles.finishButtonText}>FINISH</Text>
       </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -79,11 +109,29 @@ const SearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 35,
+    marginBottom: 25,
     padding: 30,
-    backgroundColor: '#fff',
+  },
+
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  backIcon: {
+    left: -105,
+  },
+
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
 
   searchContainer: {
+    flexDirection: 'row',
     marginBottom: 16,
   },
 
@@ -92,14 +140,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 8,
+    borderRadius: 20,
+    height: 40,
+    width: '100%',
     paddingHorizontal: 8,
     backgroundColor: '#f9f9f9',
   },
 
   searchInput: {
     flex: 1,
-    height: 40,
     fontSize: 16,
     paddingHorizontal: 8,
   },
@@ -119,10 +168,6 @@ const styles = StyleSheet.create({
 
   itemListContainer: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
   },
 
   itemText: {
@@ -132,6 +177,10 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 24,
     height: 24,
+  },
+
+  finishButtonContainer: {
+    alignItems: 'center',
   },
 
   finishButton: {
@@ -147,8 +196,13 @@ const styles = StyleSheet.create({
 
   finishButtonText: {
     color: '#fff',
+    fontFamily: 'Gill Sans',
+    fontSize: 19,
     fontWeight: 'bold',
-    fontSize: 16,
+  },
+
+  disabledButton: {
+    backgroundColor: '#a5c2a3',
   },
 
   shadow: {
