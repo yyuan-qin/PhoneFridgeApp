@@ -1,8 +1,8 @@
-# Welcome to your Expo app 👋
+# Coldfusion: The Foodie App  👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is a high fidelity prototype design for CSC318 Winter 2024 Assignment 3
 
-## Get started
+## Get started 
 
 1. Install dependencies
 

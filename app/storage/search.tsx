@@ -23,6 +23,13 @@ const SearchScreen = () => {
     { id: '1', name: 'Corn', selected: false },
     { id: '2', name: 'Frozen corn', selected: false },
     { id: '3', name: 'Popcorn', selected: false },
+    { id: '4', name: 'Cornbread', selected: false },
+    { id: '5', name: 'Cucumber', selected: false },
+    { id: '6', name: 'Apples', selected: false },
+    { id: '7', name: 'Bananas', selected: false },
+    { id: '8', name: 'Oranges', selected: false },
+    { id: '9', name: 'Grapes', selected: false },
+    { id: '10', name: 'Strawberries', selected: false },
   ]);
 
   const handleSearch = () => {
@@ -52,7 +59,11 @@ const SearchScreen = () => {
   };
 
   const handleFinish = () => {
-    router.push('../storage/review-items');
+    const selectedItems = allItems.filter((item) => item.selected);
+    router.push({
+      pathname: '../storage/review-items',
+      params: { selectedItems: JSON.stringify(selectedItems) }, // Pass data as a string
+    });
   };
 
   const isFinishDisabled = !allItems.some((item) => item.selected);

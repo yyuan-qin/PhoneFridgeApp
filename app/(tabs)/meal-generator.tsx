@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
@@ -138,13 +137,13 @@ function CustomSlider() {
 export default function MealGenerator() {
   const router = useRouter();
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Selection />
       <CustomSlider />
       <TouchableOpacity style={[styles.button, styles.shadow]} onPress={() => router.push('../meal-generator/recipe-list')}>
         <Text style={styles.buttonText}>Genereate Recipes</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -154,6 +153,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f8f9fa',
+    marginTop: 20,
   },
 
   innerContainer: {

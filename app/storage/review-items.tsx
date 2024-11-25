@@ -1,17 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from "react-native";
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+
+const GetGroceryItems = () => {
+  // Get selected items from local search params
+  const { selectedItems } = useLocalSearchParams();
+
+  if (!selectedItems) {
+    return [
+      { id: 1, name: "Steak", storage: "", amount: 1 },
+      { id: 2, name: "Sour Bread", storage: "", amount: 1 },
+      { id: 3, name: "Tomato", storage: "", amount: 1 },
+      { id: 4, name: "Apple", storage: "", amount: 1 },
+    ]; // Default items
+  }
+
+  // Transform selected items to match the grocery item schema
+  const transformSelectedItems = (selectedItems) => {
+    return selectedItems.map((item) => ({
+      id: parseInt(item.id, 10), // Convert ID to a number
+      name: item.name,
+      storage: "", // Default storage is an empty string
+      amount: 1, // Default amount is 1
+    }));
+  };
+
+  return transformSelectedItems(JSON.parse(selectedItems));
+};
 
 const GroceryReview = () => {
   const router = useRouter();
-
-  const [groceries, setGroceries] = useState([
-    { id: 1, name: "Steak", storage: "", amount: 1 },
-    { id: 2, name: "Salmon", storage: "", amount: 1 },
-    { id: 3, name: "Tomato", storage: "", amount: 1 },
-    { id: 4, name: "Apple", storage: "", amount: 1 },
-  ]);
+  const items = GetGroceryItems();
+  const [groceries, setGroceries] = useState(items);
 
   const updateAmount = (id, increment) => {
     setGroceries((prev) =>
@@ -31,6 +52,15 @@ const GroceryReview = () => {
     );
   };
 
+  const handleAddToInventory = () => {
+    router.push({
+      pathname: '../(tabs)',
+      params: { 
+        action: 'add',
+        items: JSON.stringify(groceries) },
+    });
+  };
+
   const allItemsHaveStorage = groceries.every((item) => item.storage);
 
   const renderItem = ({ item }) => (
@@ -38,7 +68,17 @@ const GroceryReview = () => {
       <View style={styles.itemRow}>
         <Text style={styles.itemText}>{item.name}</Text>
         <TouchableOpacity
-          style={styles.storageButton}
+          style={{
+            ...styles.storageButton,
+            backgroundColor:
+              item.storage === 'Frozen'
+                ? '#b3c3ff' // Blue for Frozen
+                : item.storage === 'Fridge'
+                ? '#b3e4ff' // Light for Refrigerated
+                : item.storage === 'Pantry'
+                ? '#ffe8b3' // Yellow for Pantry
+                : '#f0f0f0', // Default color
+          }}
           onPress={() =>
             updateStorage(
               item.id,
@@ -87,7 +127,7 @@ const GroceryReview = () => {
             !allItemsHaveStorage && styles.addButtonDisabled,
           ]}
           disabled={!allItemsHaveStorage}
-          onPress={() => router.push('../(tabs)')}
+          onPress={() => handleAddToInventory()}
         >
           <Text style={styles.addButtonText}>Add To Inventory</Text>
         </TouchableOpacity>
@@ -142,7 +182,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     marginRight: 30,
-    backgroundColor: "#f0f0f0",
     borderWidth: 1,
     borderColor: '#ccc',
     alignItems: "center",

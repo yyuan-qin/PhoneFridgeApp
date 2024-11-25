@@ -35,12 +35,12 @@ export default function Scan() {
         <Text style={styles.title}>Scan items or receipt </Text>
       </View>
       <CameraView style={styles.camera} facing={facing}>
-        <View style={styles.controls}>
+      </CameraView>
+      <View style={styles.controls}>
           <TouchableOpacity style={styles.captureButton} onPress={handleClick}>
             <View style={styles.innerCircle} />
           </TouchableOpacity>
         </View>
-      </CameraView>
     </View>
   );
 }
@@ -66,13 +66,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 35,
-    marginBottom: 25,
     padding: 30,
   },
 
   camera: {
     flex: 1,
-    marginBottom: 10,
+    marginBottom: 160,
   },
 
   controls: {
@@ -91,6 +90,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 5,
     borderColor: '#ddd',
+    marginBottom: 20,
   },
 
   innerCircle: {

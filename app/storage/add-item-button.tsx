@@ -29,6 +29,8 @@ const AddItemButton = () => {
   );
 };
 
+export default AddItemButton;
+
 const styles = StyleSheet.create({
   button: {
     width: 60,
@@ -47,5 +49,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-export default AddItemButton;

@@ -32,9 +32,16 @@ const recipes = [
 
 const RecipeListScreen = () => {
   const router = useRouter();
+
+  const handlePress = ({ recipeName }) => {
+    router.push({
+      pathname: '../meal-generator/detailed-recipe',
+      params: { recipeName },
+    });
+  };
   
   const renderRecipe = ({ item }) => (
-    <View style={[styles.recipeCard, styles.shadow]}>
+    <View style={styles.recipeCard}>
       <Image source={item.image} style={styles.recipeImage} />
       <View style={styles.recipeDetails}>
         <Text style={styles.recipeTitle}>{item.title}</Text>
@@ -42,8 +49,7 @@ const RecipeListScreen = () => {
         <Text style={styles.recipeInfo}>{item.ingredients}</Text>
         <Text style={styles.recipeInfo}>{item.servings}</Text>
       </View>
-
-      <TouchableOpacity onPress={() => router.push('./detailed-recipe')}>
+      <TouchableOpacity onPress={() => handlePress({recipeName: item.title})}>
         <Ionicons name="chevron-forward-outline" size={24} color="#888" style={styles.forwardIcon} />
       </TouchableOpacity>
     </View>
@@ -64,7 +70,7 @@ const RecipeListScreen = () => {
         contentContainerStyle={styles.recipeList}
       />
       <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={[styles.button, styles.shadow]}>
           <Text style={styles.buttonText}>Regenerate</Text>
         </TouchableOpacity>
       </View>
@@ -107,6 +113,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     borderWidth: 1,
+    backgroundColor: '#fff',
     borderColor: '#ddd',
     borderRadius: 10,
   },

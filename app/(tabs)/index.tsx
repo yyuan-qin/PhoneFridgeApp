@@ -1,92 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, PanResponder, Animated,TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { useLocalSearchParams } from 'expo-router';
+import DraggableItem from '../storage/storage-item';
 import AddItemButton from '../storage/add-item-button';
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createMaterialTopTabNavigator();
-
-function DraggableItem({ item, currentTab, onDrop, onQuantityChange, setTrashVisible, handleTrashDrop }) {
-  const pan = useState(new Animated.ValueXY())[0];
-
-  const panResponder = useState(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => setTrashVisible(true),
-      onPanResponderMove: Animated.event(
-        [null, { dx: pan.x, dy: pan.y }],
-        { useNativeDriver: false }
-      ),
-      onPanResponderRelease: (e, gesture) => {
-        setTrashVisible(false);
-
-        if (gesture.moveY < 100) {
-          const tabXPositions = [100, 200, 300];
-          let targetTab = null;
-
-          if (gesture.moveX >= tabXPositions[0] && gesture.moveX < tabXPositions[1]) {
-            targetTab = 'Fridge';
-          } else if (gesture.moveX >= tabXPositions[1] && gesture.moveX < tabXPositions[2]) {
-            targetTab = 'Frozen';
-          } else if (gesture.moveX >= tabXPositions[2]) {
-            targetTab = 'Pantry';
-          }
-
-          if (targetTab && targetTab !== currentTab) {
-            onDrop(item.name, currentTab, targetTab);
-          }
-        }
-
-        if (gesture.moveY > 780 && gesture.moveX < 50) {
-          handleTrashDrop(item.name, currentTab);
-        }
-        Animated.spring(pan, {
-          toValue: { x: 0, y: 0 },
-          useNativeDriver: false,
-        }).start();
-      },
-    })
-  )[0];
-
-  const backgroundColor =
-    item.expiration <= 1
-      ? '#f57676'
-      : item.expiration <= 3
-      ? '#f7b583'
-      : '#a5e6a6';
-
-  return (
-    <Animated.View
-      {...panResponder.panHandlers}
-      style={{
-        transform: [{ translateX: pan.x }, { translateY: pan.y }],
-        margin: 10,
-      }}
-    >
-      <View style={[styles.itemContainer, styles.shadow]}>
-        <Text style={{...styles.itemName, color: "#381902"}}>{item.name}</Text>
-        <Text style={{...styles.expiryContainer, fontWeight: 'bold', backgroundColor}}>{item.expiration} days</Text>
-        <View style={styles.quantityButtoncontanier}>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => onQuantityChange(item.name, item.quantity - 1)}
-          >
-            <Text>-</Text>
-          </TouchableOpacity>
-          <Text style={{color: "#381902", fontWeight: 'bold'}}>{item.quantity}</Text>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => onQuantityChange(item.name, item.quantity + 1)}
-          >
-            <Text>+</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Animated.View>
-  );
-}
 
 function TabScreen({ items, currentTab, onDrop, onQuantityChange, setTrashVisible, handleTrashDrop }) {
   return (
@@ -110,21 +30,71 @@ function TabScreen({ items, currentTab, onDrop, onQuantityChange, setTrashVisibl
 }
 
 export default function HomeScreen() {
-  const [allItems, setAllItems] = useState([
-    { name: 'Apples', expiration: 5, quantity: 1 },
-    { name: 'Banana', expiration: 3, quantity: 1 },
-    { name: 'Lettuce', expiration: 1, quantity: 1 },
-  ]);
-  const [fridgeItems, setFridgeItems] = useState([
-    { name: 'Apples', expiration: 5, quantity: 1 },
-    { name: 'Lettuce', expiration: 1, quantity: 1 },
-  ]);
+  const params = useLocalSearchParams();
+  const [allItems, setAllItems] = useState([]);
+  const [fridgeItems, setFridgeItems] = useState([]);
   const [frozenItems, setFrozenItems] = useState([]);
-  const [pantryItems, setPantryItems] = useState([
-    { name: 'Banana', expiration: 3, quantity: 1 },
-  ]);
-
+  const [pantryItems, setPantryItems] = useState([]);
+  const [processedParams, setProcessedParams] = useState({});
   const [trashVisible, setTrashVisible] = useState(false);
+
+  useEffect(() => {
+    // Initialize items
+    const items = [
+      { name: 'Salmon', expiration: 2, storage: 'Fridge', quantity: 1 },
+      { name: 'Banana', expiration: 3, storage: 'Pantry', quantity: 1 },
+      { name: 'Lettuce', expiration: 1, storage: 'Fridge', quantity: 1 },
+      { name: 'Tomatos', expiration: 1, storage: 'Fridge', quantity: 1 },
+      { name: 'Frozen Peas', expiration: 30, storage: 'Frozen', quantity: 1 },
+    ];
+    setAllItems(items);
+    setFridgeItems(items.filter((item) => item.storage === 'Fridge'));
+    setFrozenItems(items.filter((item) => item.storage === 'Frozen'));
+    setPantryItems(items.filter((item) => item.storage === 'Pantry'));
+  }, []);
+
+  useEffect(() => {
+    // Avoid re-processing the same parameters
+    if (JSON.stringify(params) === JSON.stringify(processedParams)) return;
+
+    if (params?.action === 'add' && params?.items) {
+      const newItems = JSON.parse(params.items);
+      newItems.forEach((item) => {
+        item.expiration = Math.floor(Math.random() * (15 - 7 + 1)) + 7,
+          item.quantity = item.amount,
+          delete (item.amount);
+      });
+
+      setAllItems((prev) => [...prev, ...newItems]);
+      setFridgeItems((prev) => [
+        ...prev,
+        ...newItems.filter((item) => item.storage === 'Fridge'),
+      ]);
+      setFrozenItems((prev) => [
+        ...prev,
+        ...newItems.filter((item) => item.storage === 'Frozen'),
+      ]);
+      setPantryItems((prev) => [
+        ...prev,
+        ...newItems.filter((item) => item.storage === 'Pantry'),
+      ]);
+    }
+
+    if (params?.action === 'delete' && params?.itemNames) {
+      const itemNames = JSON.parse(params.itemNames);
+
+      const filterOutItems = (list, names) =>
+        list.filter((item) => !names.includes(item.name));
+
+      setAllItems((prev) => filterOutItems(prev, itemNames));
+      setFridgeItems((prev) => filterOutItems(prev, itemNames));
+      setFrozenItems((prev) => filterOutItems(prev, itemNames));
+      setPantryItems((prev) => filterOutItems(prev, itemNames));
+    }
+
+    // Mark the current params as processed
+    setProcessedParams(params);
+  }, [params, processedParams]);
 
   const handleDrop = (itemName, sourceTab, targetTab) => {
     const removeItem = (list, name) => list.filter((item) => item.name !== name);
@@ -206,7 +176,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={styles.containier}>
       <Tab.Navigator
         screenOptions={{
           animationEnabled: false,
@@ -270,59 +240,17 @@ export default function HomeScreen() {
           <Ionicons name="trash-outline" style={styles.trashIcon} />
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = {
-  
-  itemContainer: { 
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15, 
-    borderRadius: 10,
-    backgroundColor: '#fff',
+  containier: {
+    marginTop: 50,
+    marginBottom: 25,
+    flex: 1,
   },
 
-  shadow: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-
-  itemName: { 
-    fontSize: 16, 
-    fontWeight: 'bold',
-    fontFamily: 'Gill Sans',
-  },
-
-  expiryContainer: {
-    position: 'absolute',
-    right: 150,
-    padding: 5,
-    borderRadius: 5,
-    paddingLeft: 25,
-    paddingRight:25,
-  },
-
-  quantityButton: {
-    width: 20,
-    height: 20,
-    marginHorizontal: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  quantityButtoncontanier: {
-    position: 'absolute',
-    right: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  
   addItemButton: {
     position: 'absolute',
     bottom: 10,
