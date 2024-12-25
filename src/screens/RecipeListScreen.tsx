@@ -10,7 +10,7 @@ const recipes = [
     time: '15 min',
     ingredients: '5 ingredients',
     servings: '2 servings',
-    image: require('../images/honey-garlic-salmon.jpg'),
+    image: require('../assets/images/honey-garlic-salmon.jpg'),
   },
   {
     id: '2',
@@ -18,7 +18,7 @@ const recipes = [
     time: '24 min',
     ingredients: '6 ingredients',
     servings: '2 servings',
-    image: require('../images/marry-me-salmon.jpg'),
+    image: require('../assets/images/marry-me-salmon.jpg'),
   },
   {
     id: '3',
@@ -26,7 +26,7 @@ const recipes = [
     time: '20 min',
     ingredients: '5 ingredients',
     servings: '2 servings',
-    image: require('../images/grilled-salmon.jpg'),
+    image: require('../assets/images/grilled-salmon.jpg'),
   },
 ];
 

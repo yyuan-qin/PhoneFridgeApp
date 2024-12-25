@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useLocalSearchParams } from 'expo-router';
-import DraggableItem from '../storage/storage-item';
-import AddItemButton from '../storage/add-item-button';
+import DraggableItem from '../components/StorageItem';
+import AddItemButton from '../components/LogButton';
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createMaterialTopTabNavigator();

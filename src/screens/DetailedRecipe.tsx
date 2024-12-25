@@ -9,7 +9,7 @@ const RecipeDetailsScreen = () => {
   const router = useRouter();
   const recipe = {
     title: '',
-    image: require('../images/honey-garlic-salmon.jpg'),
+    image: require('../assets/images/honey-garlic-salmon.jpg'),
     ingredients: [''],
     preparationSteps: [''],
     cookingSteps: [''],

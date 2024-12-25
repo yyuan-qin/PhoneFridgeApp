@@ -8,7 +8,7 @@ const ProfileScreen = () => {
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <Image
-          source={require('../images/test.jpg')} // Replace with actual avatar URL
+          source={require('../assets/images/profile.jpg')} // Replace with actual avatar URL
           style={styles.avatar}
         />
         <Text style={styles.name}>Autumn Qin</Text>

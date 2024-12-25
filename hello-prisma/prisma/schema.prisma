@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  name    String?
+  posts   Item[]
+}
+
+// storage: 1 = fridge, 2 = frozen, 3 = pantry
+model Item {
+  id        Int      @id @default(autoincrement())
+  name      String
+  quantity  Int
+  location  Int
+  ownerId   Int
+  owner     User?     @relation(fields: [ownerId], references: [id])
+  expiresAt DateTime
+}
+
